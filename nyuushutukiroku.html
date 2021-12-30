@@ -1,0 +1,4213 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Our game roomサーバー - 入室記録</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+
+    <style>
+        @font-face {
+            font-family: Whitney;
+            src: url(https://cdn.jsdelivr.net/gh/Tyrrrz/DiscordFonts@master/whitney-300.woff);
+            font-weight: 300;
+        }
+
+        @font-face {
+            font-family: Whitney;
+            src: url(https://cdn.jsdelivr.net/gh/Tyrrrz/DiscordFonts@master/whitney-400.woff);
+            font-weight: 400;
+        }
+
+        @font-face {
+            font-family: Whitney;
+            src: url(https://cdn.jsdelivr.net/gh/Tyrrrz/DiscordFonts@master/whitney-500.woff);
+            font-weight: 500;
+        }
+
+        @font-face {
+            font-family: Whitney;
+            src: url(https://cdn.jsdelivr.net/gh/Tyrrrz/DiscordFonts@master/whitney-600.woff);
+            font-weight: 600;
+        }
+
+        @font-face {
+            font-family: Whitney;
+            src: url(https://cdn.jsdelivr.net/gh/Tyrrrz/DiscordFonts@master/whitney-700.woff);
+            font-weight: 700;
+        }
+
+        body {
+            background-color: #36393e;
+            color: #dcddde;
+            font-family: "Whitney", "Helvetica Neue", Helvetica, Arial, sans-serif;
+            font-size: 17px;
+            font-weight: 400;
+        }
+
+        a {
+            color: #00aff4;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        img {
+            object-fit: contain;
+        }
+
+        .markdown {
+            max-width: 100%;
+            line-height: 1.3;
+            overflow-wrap: break-word;
+        }
+
+        .preserve-whitespace {
+            white-space: pre-wrap;
+        }
+
+        .spoiler-text {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        .spoiler-text--hidden {
+            cursor: pointer;
+            background-color: #202225;
+            color: rgba(0, 0, 0, 0);
+        }
+
+        .spoiler-text--hidden:hover {
+            background-color: rgba(32, 34, 37, 0.8);
+        }
+
+        .spoiler-text--hidden::selection {
+            color: rgba(0, 0, 0, 0);
+        }
+
+        .quote {
+            display: flex;
+            margin: 0.05em 0;
+        }
+
+        .quote::before {
+            content: "";
+            margin-right: 0.5em;
+            border: 2px solid #4f545c;
+            border-radius: 3px;
+        }
+
+        .pre {
+            background-color: #2f3136;
+            font-family: "Consolas", "Courier New", Courier, monospace;
+        }
+
+        .pre--multiline {
+            margin-top: 0.25em;
+            padding: 0.5em;
+            border: 2px solid #282b30;
+            border-radius: 5px;
+            color: #b9bbbe;
+        }
+
+        .pre--multiline.hljs {
+            background-color: #2f3136;
+            color: #b9bbbe;
+        }
+
+        .pre--inline {
+            padding: 2px;
+            border-radius: 3px;
+            font-size: 0.85em;
+        }
+
+        .mention {
+            border-radius: 3px;
+            padding: 0 2px;
+            color: #dee0fc;
+            background-color: rgba(88, 101, 242, .3);
+            font-weight: 500;
+        }
+
+        .mention:hover {
+            background-color: #5865f2;
+            color: #ffffff
+        }
+
+        .timestamp {
+            border-radius: 3px;
+            padding: 0 2px;
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .emoji {
+            width: 1.325em;
+            height: 1.325em;
+            margin: 0 0.06em;
+            vertical-align: -0.4em;
+        }
+
+        .emoji--small {
+            width: 1em;
+            height: 1em;
+        }
+
+        .emoji--large {
+            width: 2.8em;
+            height: 2.8em;
+        }
+
+        .preamble {
+            display: grid;
+            margin: 0 0.3em 0.6em 0.3em;
+            max-width: 100%;
+            grid-template-columns: auto 1fr;
+        }
+
+        .preamble__guild-icon-container {
+            grid-column: 1;
+        }
+
+        .preamble__guild-icon {
+            max-width: 88px;
+            max-height: 88px;
+        }
+
+        .preamble__entries-container {
+            grid-column: 2;
+            margin-left: 0.6em;
+        }
+
+        .preamble__entry {
+            font-size: 1.4em;
+            color: #ffffff;
+        }
+
+        .preamble__entry--small {
+            font-size: 1em;
+        }
+
+        .chatlog {
+            max-width: 100%;
+        }
+
+        .chatlog__message-group {
+            display: grid;
+            margin: 0 0.6em;
+            padding: 0.9em 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            grid-template-columns: auto 1fr;
+        }
+
+        .chatlog__reference-symbol {
+            grid-column: 1;
+            margin: 8px 4px 4px 18px;
+            border-left: 2px solid #4f545c;
+            border-top: 2px solid #4f545c;
+            border-radius: 8px 0 0 0;
+        }
+
+        .chatlog__reference {
+            display: flex;
+            grid-column: 2;
+            margin-bottom: 0.25em;
+            font-size: 0.875em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            align-items: center;
+            color: #b5b6b8;
+        }
+
+        .chatlog__reference-avatar {
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            margin-right: 0.25em;
+        }
+
+        .chatlog__reference-name {
+            margin-right: 0.3em;
+            font-weight: 600;
+        }
+
+        .chatlog__reference-content {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chatlog__reference-content a:hover {
+            text-decoration: none;
+        }
+
+        .chatlog__reference-link {
+            cursor: pointer;
+            color: #b5b6b8;
+        }
+
+        .chatlog__reference-link * {
+            display: inline;
+            pointer-events: none;
+        }
+
+        .chatlog__reference-link:hover {
+            color: #ffffff;
+        }
+
+        .chatlog__reference-link:hover *:not(.spoiler-text) {
+            color: #ffffff;
+        }
+
+        .chatlog__reference-edited-timestamp {
+            margin-left: 0.25em;
+            font-size: 0.8em;
+            unicode-bidi: bidi-override;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chatlog__author-avatar-container {
+            grid-column: 1;
+            width: 40px;
+            height: 40px;
+            margin-right: 16px;
+        }
+
+        .chatlog__author-avatar {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+
+        .chatlog__messages {
+            grid-column: 2;
+            min-width: 50%;
+            direction: ltr;
+        }
+
+        .chatlog__author-name {
+            font-weight: 500;
+            color: #ffffff;
+        }
+
+        .chatlog__timestamp {
+            margin-left: 0.3em;
+            font-size: 0.75em;
+            direction: ltr;
+            unicode-bidi: bidi-override;
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chatlog__message {
+            padding: 0.1em 0.3em;
+            margin: 0 -0.3em;
+            background-color: transparent;
+            transition: background-color 1s ease;
+        }
+
+        .chatlog__message--highlighted {
+            background-color: rgba(114, 137, 218, 0.2);
+        }
+
+        .chatlog__message--pinned {
+            background-color: rgba(249, 168, 37, 0.05);
+        }
+
+        .chatlog__content {
+            font-size: 0.95em;
+            word-wrap: break-word;
+        }
+
+        .chatlog__edited-timestamp {
+            margin-left: 0.15em;
+            font-size: 0.8em;
+        }
+
+        .chatlog__attachment {
+            display: inline-block;
+            position: relative;
+            margin-top: 0.3em;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .chatlog__attachment--hidden {
+            cursor: pointer;
+            box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .chatlog__attachment--hidden * {
+            pointer-events: none;
+        }
+
+        .chatlog__attachment-spoiler-caption {
+            display: none;
+            z-index: 999;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            padding: 0.4em 0.8em;
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 20px;
+            color: #dcddde;
+            font-size: 0.9em;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+
+        .chatlog__attachment--hidden .chatlog__attachment-spoiler-caption {
+            display: block;
+        }
+
+        .chatlog__attachment--hidden:hover .chatlog__attachment-spoiler-caption {
+            color: #fff;
+        }
+
+        .chatlog__attachment-media {
+            vertical-align: top;
+            max-width: 45vw;
+            max-height: 500px;
+            border-radius: 3px;
+        }
+
+        .chatlog__attachment--hidden .chatlog__attachment-media {
+            filter: blur(44px);
+        }
+
+        .chatlog__attachment-generic {
+            width: 100%;
+            max-width: 520px;
+            height: 40px;
+            padding: 10px;
+            background-color: #2f3136;
+            border: 1px solid #292b2f;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .chatlog__attachment--hidden .chatlog__attachment-generic {
+            filter: blur(44px);
+        }
+
+        .chatlog__attachment-generic-icon {
+            float: left;
+            width: 30px;
+            height: 100%;
+            margin-right: 10px;
+        }
+
+        .chatlog__attachment-generic-size {
+            color: #72767d;
+            font-size: 12px;
+        }
+
+        .chatlog__attachment-generic-name {
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+
+        .chatlog__edited-timestamp {
+            color: rgba(255, 255, 255, 0.2);
+        }
+
+        .chatlog__embed {
+            display: flex;
+            margin-top: 0.3em;
+            max-width: 520px;
+        }
+
+        .chatlog__embed-color-pill {
+            flex-shrink: 0;
+            width: 0.25em;
+            border-top-left-radius: 3px;
+            border-bottom-left-radius: 3px;
+        }
+
+        .chatlog__embed-color-pill--default {
+            background-color: #202225;
+        }
+
+        .chatlog__embed-content-container {
+            display: flex;
+            flex-direction: column;
+            padding: 0.5em 0.6em;
+            background-color: rgba(46, 48, 54, 0.3);
+            border: 1px solid rgba(46, 48, 54, 0.6);
+            border-top-right-radius: 3px;
+            border-bottom-right-radius: 3px;
+        }
+
+        .chatlog__embed-content {
+            display: flex;
+            width: 100%;
+        }
+
+        .chatlog__embed-text {
+            flex: 1;
+        }
+
+        .chatlog__embed-author {
+            display: flex;
+            margin-bottom: 0.3em;
+            align-items: center;
+        }
+
+        .chatlog__embed-author-icon {
+            margin-right: 0.5em;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+
+        .chatlog__embed-author-name {
+            font-size: 0.875em;
+            font-weight: 600;
+            direction: ltr;
+            unicode-bidi: bidi-override;
+            color: #ffffff
+        }
+
+        .chatlog__embed-author-name-link {
+            color: #ffffff;
+        }
+
+        .chatlog__embed-title {
+            margin-bottom: 0.2em;
+            font-size: 0.875em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .chatlog__embed-description {
+            font-weight: 500;
+            font-size: 0.85em;
+            color: #dcddde;
+        }
+
+        .chatlog__embed-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0 0.5em;
+        }
+
+        .chatlog__embed-field {
+            flex: 0;
+            min-width: 100%;
+            max-width: 506px;
+            padding-top: 0.6em;
+            font-size: 0.875em;
+        }
+
+        .chatlog__embed-field--inline {
+            flex: 1;
+            flex-basis: auto;
+            min-width: 150px;
+        }
+
+        .chatlog__embed-field-name {
+            margin-bottom: 0.2em;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .chatlog__embed-field-value {
+            font-weight: 500;
+            color: #dcddde;
+        }
+
+        .chatlog__embed-thumbnail {
+            flex: 0;
+            margin-left: 1.2em;
+            max-width: 80px;
+            max-height: 80px;
+            border-radius: 3px;
+        }
+
+        .chatlog__embed-image-container {
+            margin-top: 0.6em;
+        }
+
+        .chatlog__embed-image {
+            max-width: 500px;
+            max-height: 400px;
+            border-radius: 3px;
+        }
+
+        .chatlog__embed-footer {
+            margin-top: 0.6em;
+            color: #dcddde;
+        }
+
+        .chatlog__embed-footer-icon {
+            margin-right: 0.2em;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            vertical-align: middle;
+        }
+
+        .chatlog__embed-footer-text {
+            vertical-align: middle;
+            font-size: 0.75em;
+            font-weight: 500;
+        }
+
+        .chatlog__embed-plainimage {
+            vertical-align: top;
+            max-width: 45vw;
+            max-height: 500px;
+            border-radius: 3px;
+        }
+
+        .chatlog__embed-spotify {
+            border: 0;
+        }
+
+        .chatlog__embed-youtube-container {
+            margin-top: 0.6em;
+        }
+
+        .chatlog__embed-youtube {
+            border: 0;
+            border-radius: 3px;
+        }
+
+        .chatlog__reactions {
+            display: flex;
+        }
+
+        .chatlog__reaction {
+            display: flex;
+            align-items: center;
+            margin: 0.35em 0.1em 0.1em 0;
+            padding: .125rem .375rem;
+            background-color: #2f3136;
+            border-radius: 8px;
+            border-color: transparent;
+            border-width: 1px;
+            border-style: solid;
+        }
+
+        .chatlog__reaction:hover {
+            border-color: hsla(0,0%,100%,.2);
+            border-width: 1px;
+            border-style: solid;
+            background-color: transparent;
+        }
+
+        .chatlog__reaction-count {
+            min-width: 9px;
+            margin-left: 0.35em;
+            font-size: 0.875em;
+            color: #b9bbbe;
+        }
+
+        .chatlog__reaction:hover .chatlog__reaction-count {
+            color: #dcddde;
+        }
+
+        .chatlog__bot-tag {
+            position: relative;
+            top: -.1em;
+            margin-left: 0.3em;
+            padding: 0.05em 0.3em;
+            border-radius: 3px;
+            line-height: 1.3;
+            background-color: #5865F2;
+            color: #ffffff;
+            font-size: 0.625em;
+            font-weight: 500;
+        }
+
+        .postamble {
+            margin: 1.4em 0.3em 0.6em 0.3em;
+            padding: 1em;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .postamble__entry {
+            color: #ffffff;
+        }
+    </style>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/styles/solarized-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.6/highlight.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.pre--multiline').forEach(block => hljs.highlightBlock(block));
+        });
+    </script>
+
+    <script>
+        function scrollToMessage(event, id) {
+            var element = document.getElementById('message-' + id);
+
+            if (element) {
+                event.preventDefault();
+
+                element.classList.add('chatlog__message--highlighted');
+
+                window.scrollTo({
+                    top: element.getBoundingClientRect().top - document.body.getBoundingClientRect().top - (window.innerHeight / 2),
+                    behavior: 'smooth'
+                });
+
+                window.setTimeout(function() {
+                    element.classList.remove('chatlog__message--highlighted');
+                }, 2000);
+            }
+        }
+
+        function showSpoiler(event, element) {
+            if (element && element.classList.contains('spoiler-text--hidden')) {
+                event.preventDefault();
+                element.classList.remove('spoiler-text--hidden');
+            }
+            if (element && element.classList.contains('chatlog__attachment--hidden')) {
+                event.preventDefault();
+                element.classList.remove('chatlog__attachment--hidden');
+            }
+        }
+    </script>
+
+    <svg style="display: none">
+        <symbol id="icon-attachment" viewBox="0 0 720 960">
+            <path fill="#f4f5fb" d="M50,935a25,25,0,0,1-25-25V50A25,25,0,0,1,50,25H519.6L695,201.32V910a25,25,0,0,1-25,25Z" />
+            <path fill="#7789c4" d="M509.21,50,670,211.63V910H50V50H509.21M530,0H50A50,50,0,0,0,0,50V910a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50h0V191Z" />
+            <path fill="#f4f5fb" d="M530,215a25,25,0,0,1-25-25V50a25,25,0,0,1,16.23-23.41L693.41,198.77A25,25,0,0,1,670,215Z" />
+            <path fill="#7789c4" d="M530,70.71,649.29,190H530V70.71M530,0a50,50,0,0,0-50,50V190a50,50,0,0,0,50,50H670a50,50,0,0,0,50-50Z" />
+        </symbol>
+    </svg>
+</head>
+<body>
+
+<div class="preamble">
+    <div class="preamble__guild-icon-container">
+        <img class="preamble__guild-icon" src="https://cdn.discordapp.com/icons/921647805683077160/b151af22f5374e00fa1a0cffe359319b.png" alt="Guild icon" loading="lazy">
+    </div>
+    <div class="preamble__entries-container">
+        <div class="preamble__entry">Our game roomサーバー</div>
+        <div class="preamble__entry">Text / 入室記録</div>
+
+
+    </div>
+</div>
+
+<div class="chatlog">
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 02:29 PM</span>
+
+            <div class="chatlog__message " data-message-id="923084737113907230" id="message-923084737113907230" title="Message sent: 22-Dec-21 02:29 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923084736891613204/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923084736891613204/card.png" alt="Image attachment" title="Image: card.png (76.37 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 03:26 PM</span>
+
+            <div class="chatlog__message " data-message-id="923099134100131860" id="message-923099134100131860" title="Message sent: 22-Dec-21 03:26 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923099133806538792/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923099133806538792/card.png" alt="Image attachment" title="Image: card.png (89.29 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 04:19 PM</span>
+
+            <div class="chatlog__message " data-message-id="923112604921126952" id="message-923112604921126952" title="Message sent: 22-Dec-21 04:19 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923112604719775814/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923112604719775814/card.png" alt="Image attachment" title="Image: card.png (79.53 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923113174742474793" id="message-923113174742474793" title="Message sent: 22-Dec-21 04:22 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923113174897659934/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923113174897659934/card.png" alt="Image attachment" title="Image: card.png (108.14 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 05:42 PM</span>
+
+            <div class="chatlog__message " data-message-id="923133411198107651" id="message-923133411198107651" title="Message sent: 22-Dec-21 05:42 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923133411378487306/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923133411378487306/card.png" alt="Image attachment" title="Image: card.png (34.95 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 06:10 PM</span>
+
+            <div class="chatlog__message " data-message-id="923140385415528448" id="message-923140385415528448" title="Message sent: 22-Dec-21 06:10 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923140385193213953/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923140385193213953/card.png" alt="Image attachment" title="Image: card.png (45.37 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 06:18 PM</span>
+
+            <div class="chatlog__message " data-message-id="923142358332223529" id="message-923142358332223529" title="Message sent: 22-Dec-21 06:18 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923142358441267230/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923142358441267230/card.png" alt="Image attachment" title="Image: card.png (39.34 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 06:56 PM</span>
+
+            <div class="chatlog__message " data-message-id="923151963665866783" id="message-923151963665866783" title="Message sent: 22-Dec-21 06:56 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923151963741388810/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923151963741388810/card.png" alt="Image attachment" title="Image: card.png (35.65 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 09:28 PM</span>
+
+            <div class="chatlog__message " data-message-id="923190333125304321" id="message-923190333125304321" title="Message sent: 22-Dec-21 09:28 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923190333255319562/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923190333255319562/card.png" alt="Image attachment" title="Image: card.png (38.47 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 10:43 PM</span>
+
+            <div class="chatlog__message " data-message-id="923209172516999250" id="message-923209172516999250" title="Message sent: 22-Dec-21 10:43 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923209172642840616/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923209172642840616/card.png" alt="Image attachment" title="Image: card.png (50.12 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">22-Dec-21 11:12 PM</span>
+
+            <div class="chatlog__message " data-message-id="923216525060620360" id="message-923216525060620360" title="Message sent: 22-Dec-21 11:12 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923216525203243038/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923216525203243038/card.png" alt="Image attachment" title="Image: card.png (126.04 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 12:29 AM</span>
+
+            <div class="chatlog__message " data-message-id="923235758423293984" id="message-923235758423293984" title="Message sent: 23-Dec-21 12:29 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923235758310043698/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923235758310043698/card.png" alt="Image attachment" title="Image: card.png (124.65 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 01:26 AM</span>
+
+            <div class="chatlog__message " data-message-id="923250180462096535" id="message-923250180462096535" title="Message sent: 23-Dec-21 01:26 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923250180613099530/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923250180613099530/card.png" alt="Image attachment" title="Image: card.png (151.09 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 01:35 AM</span>
+
+            <div class="chatlog__message " data-message-id="923252314322661466" id="message-923252314322661466" title="Message sent: 23-Dec-21 01:35 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923252314167468112/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923252314167468112/card.png" alt="Image attachment" title="Image: card.png (94.47 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923253408096464916" id="message-923253408096464916" title="Message sent: 23-Dec-21 01:39 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923253407710601296/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923253407710601296/card.png" alt="Image attachment" title="Image: card.png (96.21 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923253781221744681" id="message-923253781221744681" title="Message sent: 23-Dec-21 01:40 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923253781322399744/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923253781322399744/card.png" alt="Image attachment" title="Image: card.png (93.42 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 02:05 AM</span>
+
+            <div class="chatlog__message " data-message-id="923260066877042698" id="message-923260066877042698" title="Message sent: 23-Dec-21 02:05 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923260066583433226/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923260066583433226/card.png" alt="Image attachment" title="Image: card.png (42.6 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 02:19 AM</span>
+
+            <div class="chatlog__message " data-message-id="923263489932419092" id="message-923263489932419092" title="Message sent: 23-Dec-21 02:19 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923263489726881822/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923263489726881822/card.png" alt="Image attachment" title="Image: card.png (35.75 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923263811308384256" id="message-923263811308384256" title="Message sent: 23-Dec-21 02:20 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923263811102867486/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923263811102867486/card.png" alt="Image attachment" title="Image: card.png (114.17 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 03:17 AM</span>
+
+            <div class="chatlog__message " data-message-id="923278067961565195" id="message-923278067961565195" title="Message sent: 23-Dec-21 03:17 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923278068045467678/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923278068045467678/card.png" alt="Image attachment" title="Image: card.png (34.56 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 03:28 AM</span>
+
+            <div class="chatlog__message " data-message-id="923280882696069201" id="message-923280882696069201" title="Message sent: 23-Dec-21 03:28 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923280882809307156/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923280882809307156/card.png" alt="Image attachment" title="Image: card.png (111.86 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923281541776416788" id="message-923281541776416788" title="Message sent: 23-Dec-21 03:31 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923281541554143303/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923281541554143303/card.png" alt="Image attachment" title="Image: card.png (104.36 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923281851064385568" id="message-923281851064385568" title="Message sent: 23-Dec-21 03:32 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923281851257348096/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923281851257348096/card.png" alt="Image attachment" title="Image: card.png (47.49 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 03:53 AM</span>
+
+            <div class="chatlog__message " data-message-id="923287268918181929" id="message-923287268918181929" title="Message sent: 23-Dec-21 03:53 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923287268972695582/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923287268972695582/card.png" alt="Image attachment" title="Image: card.png (80.11 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 06:01 AM</span>
+
+            <div class="chatlog__message " data-message-id="923319389967761468" id="message-923319389967761468" title="Message sent: 23-Dec-21 06:01 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923319389623824404/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923319389623824404/card.png" alt="Image attachment" title="Image: card.png (59.92 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 08:03 AM</span>
+
+            <div class="chatlog__message " data-message-id="923350019925495968" id="message-923350019925495968" title="Message sent: 23-Dec-21 08:03 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923350019728351272/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923350019728351272/card.png" alt="Image attachment" title="Image: card.png (109.96 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 11:01 AM</span>
+
+            <div class="chatlog__message " data-message-id="923394773157576764" id="message-923394773157576764" title="Message sent: 23-Dec-21 11:01 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923394772972998757/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923394772972998757/card.png" alt="Image attachment" title="Image: card.png (113.36 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 11:47 AM</span>
+
+            <div class="chatlog__message " data-message-id="923406429543624705" id="message-923406429543624705" title="Message sent: 23-Dec-21 11:47 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923406429631676466/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923406429631676466/card.png" alt="Image attachment" title="Image: card.png (117.31 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 12:32 PM</span>
+
+            <div class="chatlog__message " data-message-id="923417799962013797" id="message-923417799962013797" title="Message sent: 23-Dec-21 12:32 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923417800062672906/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923417800062672906/card.png" alt="Image attachment" title="Image: card.png (37.1 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 01:47 PM</span>
+
+            <div class="chatlog__message " data-message-id="923436554330984449" id="message-923436554330984449" title="Message sent: 23-Dec-21 01:47 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923436554351951892/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923436554351951892/card.png" alt="Image attachment" title="Image: card.png (126.37 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 01:55 PM</span>
+
+            <div class="chatlog__message " data-message-id="923438590816555049" id="message-923438590816555049" title="Message sent: 23-Dec-21 01:55 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923438590942404638/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923438590942404638/card.png" alt="Image attachment" title="Image: card.png (35.91 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 02:47 PM</span>
+
+            <div class="chatlog__message " data-message-id="923451815763259412" id="message-923451815763259412" title="Message sent: 23-Dec-21 02:47 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923451815553548359/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923451815553548359/card.png" alt="Image attachment" title="Image: card.png (36.46 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 03:09 PM</span>
+
+            <div class="chatlog__message " data-message-id="923457317335334913" id="message-923457317335334913" title="Message sent: 23-Dec-21 03:09 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923457317524082728/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923457317524082728/card.png" alt="Image attachment" title="Image: card.png (40.9 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 03:47 PM</span>
+
+            <div class="chatlog__message " data-message-id="923466873293668423" id="message-923466873293668423" title="Message sent: 23-Dec-21 03:47 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923466873121697832/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923466873121697832/card.png" alt="Image attachment" title="Image: card.png (39.09 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 04:30 PM</span>
+
+            <div class="chatlog__message " data-message-id="923477754396147713" id="message-923477754396147713" title="Message sent: 23-Dec-21 04:30 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923477754454872074/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923477754454872074/card.png" alt="Image attachment" title="Image: card.png (35.52 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923479088151285771" id="message-923479088151285771" title="Message sent: 23-Dec-21 04:36 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923479088071577610/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923479088071577610/card.png" alt="Image attachment" title="Image: card.png (59.16 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923480298602262568" id="message-923480298602262568" title="Message sent: 23-Dec-21 04:41 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923480298400927784/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923480298400927784/card.png" alt="Image attachment" title="Image: card.png (70.18 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923480350754222110" id="message-923480350754222110" title="Message sent: 23-Dec-21 04:41 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923480350468997171/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923480350468997171/card.png" alt="Image attachment" title="Image: card.png (108.73 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 05:04 PM</span>
+
+            <div class="chatlog__message " data-message-id="923486132489056287" id="message-923486132489056287" title="Message sent: 23-Dec-21 05:04 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923486132585521162/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923486132585521162/card.png" alt="Image attachment" title="Image: card.png (63.86 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923487017160015893" id="message-923487017160015893" title="Message sent: 23-Dec-21 05:07 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923487017134866512/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923487017134866512/card.png" alt="Image attachment" title="Image: card.png (57.85 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923487554873995264" id="message-923487554873995264" title="Message sent: 23-Dec-21 05:09 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923487554655911947/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923487554655911947/card.png" alt="Image attachment" title="Image: card.png (87.64 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 05:43 PM</span>
+
+            <div class="chatlog__message " data-message-id="923496129163841597" id="message-923496129163841597" title="Message sent: 23-Dec-21 05:43 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923496129281265755/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923496129281265755/card.png" alt="Image attachment" title="Image: card.png (34.62 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 06:02 PM</span>
+
+            <div class="chatlog__message " data-message-id="923500880362373141" id="message-923500880362373141" title="Message sent: 23-Dec-21 06:02 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923500880471408670/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923500880471408670/card.png" alt="Image attachment" title="Image: card.png (92.59 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 06:21 PM</span>
+
+            <div class="chatlog__message " data-message-id="923505559901204480" id="message-923505559901204480" title="Message sent: 23-Dec-21 06:21 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923505559674708019/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923505559674708019/card.png" alt="Image attachment" title="Image: card.png (106.63 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 06:59 PM</span>
+
+            <div class="chatlog__message " data-message-id="923515223002976267" id="message-923515223002976267" title="Message sent: 23-Dec-21 06:59 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923515223103655936/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923515223103655936/card.png" alt="Image attachment" title="Image: card.png (49.69 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 08:33 PM</span>
+
+            <div class="chatlog__message " data-message-id="923538751152619551" id="message-923538751152619551" title="Message sent: 23-Dec-21 08:33 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923538750947074069/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923538750947074069/card.png" alt="Image attachment" title="Image: card.png (112.57 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 08:56 PM</span>
+
+            <div class="chatlog__message " data-message-id="923544550566420561" id="message-923544550566420561" title="Message sent: 23-Dec-21 08:56 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923544550352506931/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923544550352506931/card.png" alt="Image attachment" title="Image: card.png (84.76 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 09:35 PM</span>
+
+            <div class="chatlog__message " data-message-id="923554415296806912" id="message-923554415296806912" title="Message sent: 23-Dec-21 09:35 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923554415057698846/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923554415057698846/card.png" alt="Image attachment" title="Image: card.png (109.22 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 10:56 PM</span>
+
+            <div class="chatlog__message " data-message-id="923574672585551933" id="message-923574672585551933" title="Message sent: 23-Dec-21 10:56 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923574672757522432/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923574672757522432/card.png" alt="Image attachment" title="Image: card.png (49.82 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">23-Dec-21 11:24 PM</span>
+
+            <div class="chatlog__message " data-message-id="923581827002806396" id="message-923581827002806396" title="Message sent: 23-Dec-21 11:24 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923581827187367986/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923581827187367986/card.png" alt="Image attachment" title="Image: card.png (105.7 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923581897307734037" id="message-923581897307734037" title="Message sent: 23-Dec-21 11:24 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923581897408389140/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923581897408389140/card.png" alt="Image attachment" title="Image: card.png (74.58 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 12:36 AM</span>
+
+            <div class="chatlog__message " data-message-id="923600051123679263" id="message-923600051123679263" title="Message sent: 24-Dec-21 12:36 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923600051249479730/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923600051249479730/card.png" alt="Image attachment" title="Image: card.png (41.19 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 01:13 AM</span>
+
+            <div class="chatlog__message " data-message-id="923609175983001610" id="message-923609175983001610" title="Message sent: 24-Dec-21 01:13 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923609175521652766/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923609175521652766/card.png" alt="Image attachment" title="Image: card.png (87.97 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 01:28 AM</span>
+
+            <div class="chatlog__message " data-message-id="923613086357799002" id="message-923613086357799002" title="Message sent: 24-Dec-21 01:28 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923613086076764210/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923613086076764210/card.png" alt="Image attachment" title="Image: card.png (94.28 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 01:24 PM</span>
+
+            <div class="chatlog__message " data-message-id="923793274060275794" id="message-923793274060275794" title="Message sent: 24-Dec-21 01:24 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923793274223874058/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923793274223874058/card.png" alt="Image attachment" title="Image: card.png (116.79 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 02:51 PM</span>
+
+            <div class="chatlog__message " data-message-id="923815151893893120" id="message-923815151893893120" title="Message sent: 24-Dec-21 02:51 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923815151713521664/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923815151713521664/card.png" alt="Image attachment" title="Image: card.png (89.12 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 03:12 PM</span>
+
+            <div class="chatlog__message " data-message-id="923820314297774141" id="message-923820314297774141" title="Message sent: 24-Dec-21 03:12 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923820314406817822/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923820314406817822/card.png" alt="Image attachment" title="Image: card.png (36.86 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 05:12 PM</span>
+
+            <div class="chatlog__message " data-message-id="923850527039713321" id="message-923850527039713321" title="Message sent: 24-Dec-21 05:12 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923850526771253258/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923850526771253258/card.png" alt="Image attachment" title="Image: card.png (48.18 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">24-Dec-21 11:23 PM</span>
+
+            <div class="chatlog__message " data-message-id="923943930008047646" id="message-923943930008047646" title="Message sent: 24-Dec-21 11:23 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923943929743802438/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923943929743802438/card.png" alt="Image attachment" title="Image: card.png (74.43 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 12:07 AM</span>
+
+            <div class="chatlog__message " data-message-id="923955148353601537" id="message-923955148353601537" title="Message sent: 25-Dec-21 12:07 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923955148466835506/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923955148466835506/card.png" alt="Image attachment" title="Image: card.png (104.99 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923955151524483074" id="message-923955151524483074" title="Message sent: 25-Dec-21 12:07 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923955151650304050/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923955151650304050/card.png" alt="Image attachment" title="Image: card.png (78.42 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923955790312783912" id="message-923955790312783912" title="Message sent: 25-Dec-21 12:10 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923955790124027914/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923955790124027914/card.png" alt="Image attachment" title="Image: card.png (133.8 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923956788779429939" id="message-923956788779429939" title="Message sent: 25-Dec-21 12:14 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923956788871716864/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923956788871716864/card.png" alt="Image attachment" title="Image: card.png (78.1 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/411916947773587456/46854d5b4a6c2f4c8b2f43e9de002d82.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="Jockie Music#8158" data-user-id="411916947773587456" style="color: rgb(231,76,60)">Jockie Music</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 12:33 AM</span>
+
+            <div class="chatlog__message " data-message-id="923961525767651389" id="message-923961525767651389" title="Message sent: 25-Dec-21 12:33 AM">
+
+
+                        <div class="chatlog__embed">
+                                <div class="chatlog__embed-color-pill chatlog__embed-color-pill--default"></div>
+
+                            <div class="chatlog__embed-content-container">
+                                <div class="chatlog__embed-content">
+                                    <div class="chatlog__embed-text">
+
+
+
+                                            <div class="chatlog__embed-fields">
+                                                    <div class="chatlog__embed-field ">
+                                                            <div class="chatlog__embed-field-name">
+                                                                <div class="markdown preserve-whitespace">Basic commands</div>
+                                                            </div>
+
+                                                            <div class="chatlog__embed-field-value">
+                                                                <div class="markdown preserve-whitespace"><a href="https://www.jockiemusic.com/commands.html?q=play&category=playback&selected=play"><span class="pre pre--inline">m!play</span></a> - Play a track by link or search term
+<a href="https://www.jockiemusic.com/commands.html?q=skip&category=queue+state&selected=skip"><span class="pre pre--inline">m!skip</span></a> - Skip the current track
+<a href="https://www.jockiemusic.com/commands.html?q=leave&category=playback&selected=leave"><span class="pre pre--inline">m!leave</span></a> - Make the bot leave the voice channel
+<a href="https://www.jockiemusic.com/commands.html?q=setup&category=meta"><span class="pre pre--inline">m!setup</span></a> - Helps you setup certain bot features
+
+Visit our <strong><a href="https://www.jockiemusic.com/commands.html">website</a></strong> or use the <a href="https://www.jockiemusic.com/commands.html?q=help&selected=help"><span class="pre pre--inline">m!help</span></a> command for more commands. To switch page of the help menu or any other command write <span class="pre pre--inline">next page</span> or <span class="pre pre--inline">previous page</span>.</div>
+                                                            </div>
+                                                    </div>
+                                                    <div class="chatlog__embed-field ">
+                                                            <div class="chatlog__embed-field-name">
+                                                                <div class="markdown preserve-whitespace">Support server</div>
+                                                            </div>
+
+                                                            <div class="chatlog__embed-field-value">
+                                                                <div class="markdown preserve-whitespace">Join our <strong><a href="https://discord.gg/JuqEXb5">support server</a></strong> if you need help, want to get information about updates and issues or want to engage in community discussions with the developers!</div>
+                                                            </div>
+                                                    </div>
+                                            </div>
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 12:33 AM</span>
+
+            <div class="chatlog__message " data-message-id="923961529232146482" id="message-923961529232146482" title="Message sent: 25-Dec-21 12:33 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923961526853971988/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923961526853971988/card.png" alt="Image attachment" title="Image: card.png (66.54 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923962865390583829" id="message-923962865390583829" title="Message sent: 25-Dec-21 12:38 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923962865495461898/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923962865495461898/card.png" alt="Image attachment" title="Image: card.png (70.48 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="923962929894817793" id="message-923962929894817793" title="Message sent: 25-Dec-21 12:38 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/923962930121289799/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/923962930121289799/card.png" alt="Image attachment" title="Image: card.png (95.15 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 06:56 AM</span>
+
+            <div class="chatlog__message " data-message-id="924058080528969769" id="message-924058080528969769" title="Message sent: 25-Dec-21 06:56 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924058080621236274/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924058080621236274/card.png" alt="Image attachment" title="Image: card.png (99.54 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 07:07 AM</span>
+
+            <div class="chatlog__message " data-message-id="924060623401287681" id="message-924060623401287681" title="Message sent: 25-Dec-21 07:07 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924060623606775830/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924060623606775830/card.png" alt="Image attachment" title="Image: card.png (39.5 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 07:28 AM</span>
+
+            <div class="chatlog__message " data-message-id="924066062016860192" id="message-924066062016860192" title="Message sent: 25-Dec-21 07:28 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924066062176239636/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924066062176239636/card.png" alt="Image attachment" title="Image: card.png (92.45 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 01:14 PM</span>
+
+            <div class="chatlog__message " data-message-id="924153039785455637" id="message-924153039785455637" title="Message sent: 25-Dec-21 01:14 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924153039932248084/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924153039932248084/card.png" alt="Image attachment" title="Image: card.png (40.43 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 03:18 PM</span>
+
+            <div class="chatlog__message " data-message-id="924184323035394129" id="message-924184323035394129" title="Message sent: 25-Dec-21 03:18 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924184323173777449/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924184323173777449/card.png" alt="Image attachment" title="Image: card.png (38.26 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924184402395791432" id="message-924184402395791432" title="Message sent: 25-Dec-21 03:18 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924184402576179220/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924184402576179220/card.png" alt="Image attachment" title="Image: card.png (120.75 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 03:40 PM</span>
+
+            <div class="chatlog__message " data-message-id="924189787311710238" id="message-924189787311710238" title="Message sent: 25-Dec-21 03:40 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924189787097817158/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924189787097817158/card.png" alt="Image attachment" title="Image: card.png (102.29 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">25-Dec-21 09:35 PM</span>
+
+            <div class="chatlog__message " data-message-id="924279215166214155" id="message-924279215166214155" title="Message sent: 25-Dec-21 09:35 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924279215271067718/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924279215271067718/card.png" alt="Image attachment" title="Image: card.png (47.07 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 01:04 AM</span>
+
+            <div class="chatlog__message " data-message-id="924331825189515325" id="message-924331825189515325" title="Message sent: 26-Dec-21 01:04 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924331825281773638/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924331825281773638/card.png" alt="Image attachment" title="Image: card.png (50.5 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 02:29 AM</span>
+
+            <div class="chatlog__message " data-message-id="924353123533877269" id="message-924353123533877269" title="Message sent: 26-Dec-21 02:29 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924353123668090900/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924353123668090900/card.png" alt="Image attachment" title="Image: card.png (102.04 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 08:43 AM</span>
+
+            <div class="chatlog__message " data-message-id="924447336581705811" id="message-924447336581705811" title="Message sent: 26-Dec-21 08:43 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924447336816578580/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924447336816578580/card.png" alt="Image attachment" title="Image: card.png (97.34 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924448627487801445" id="message-924448627487801445" title="Message sent: 26-Dec-21 08:48 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924448627643011122/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924448627643011122/card.png" alt="Image attachment" title="Image: card.png (94.04 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 11:20 AM</span>
+
+            <div class="chatlog__message " data-message-id="924486809738682390" id="message-924486809738682390" title="Message sent: 26-Dec-21 11:20 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924486809839357952/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924486809839357952/card.png" alt="Image attachment" title="Image: card.png (109.16 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 12:10 PM</span>
+
+            <div class="chatlog__message " data-message-id="924499317090291752" id="message-924499317090291752" title="Message sent: 26-Dec-21 12:10 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924499316939305000/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924499316939305000/card.png" alt="Image attachment" title="Image: card.png (117.82 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 01:14 PM</span>
+
+            <div class="chatlog__message " data-message-id="924515405500915723" id="message-924515405500915723" title="Message sent: 26-Dec-21 01:14 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924515405605781504/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924515405605781504/card.png" alt="Image attachment" title="Image: card.png (68.36 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 01:34 PM</span>
+
+            <div class="chatlog__message " data-message-id="924520506651205675" id="message-924520506651205675" title="Message sent: 26-Dec-21 01:34 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924520506764455976/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924520506764455976/card.png" alt="Image attachment" title="Image: card.png (107.85 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924520826357833758" id="message-924520826357833758" title="Message sent: 26-Dec-21 01:35 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924520826164903946/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924520826164903946/card.png" alt="Image attachment" title="Image: card.png (126.48 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924521798333268038" id="message-924521798333268038" title="Message sent: 26-Dec-21 01:39 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924521798144503858/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924521798144503858/card.png" alt="Image attachment" title="Image: card.png (107.53 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924523303790579732" id="message-924523303790579732" title="Message sent: 26-Dec-21 01:45 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924523303618621450/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924523303618621450/card.png" alt="Image attachment" title="Image: card.png (129.24 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 04:22 PM</span>
+
+            <div class="chatlog__message " data-message-id="924562871856287776" id="message-924562871856287776" title="Message sent: 26-Dec-21 04:22 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924562872086962186/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924562872086962186/card.png" alt="Image attachment" title="Image: card.png (134.36 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 05:30 PM</span>
+
+            <div class="chatlog__message " data-message-id="924579932955353101" id="message-924579932955353101" title="Message sent: 26-Dec-21 05:30 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924579933106360330/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924579933106360330/card.png" alt="Image attachment" title="Image: card.png (61.27 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 09:58 PM</span>
+
+            <div class="chatlog__message " data-message-id="924647408946798632" id="message-924647408946798632" title="Message sent: 26-Dec-21 09:58 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924647408791605298/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924647408791605298/card.png" alt="Image attachment" title="Image: card.png (81.95 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924648267915075615" id="message-924648267915075615" title="Message sent: 26-Dec-21 10:02 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924648268011569172/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924648268011569172/card.png" alt="Image attachment" title="Image: card.png (36.73 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924649114736672799" id="message-924649114736672799" title="Message sent: 26-Dec-21 10:05 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924649114828955708/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924649114828955708/card.png" alt="Image attachment" title="Image: card.png (93.27 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 10:22 PM</span>
+
+            <div class="chatlog__message " data-message-id="924653299599298592" id="message-924653299599298592" title="Message sent: 26-Dec-21 10:22 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924653299687374868/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924653299687374868/card.png" alt="Image attachment" title="Image: card.png (111.38 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">26-Dec-21 11:10 PM</span>
+
+            <div class="chatlog__message " data-message-id="924665380159520798" id="message-924665380159520798" title="Message sent: 26-Dec-21 11:10 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924665379110920202/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924665379110920202/card.png" alt="Image attachment" title="Image: card.png (149.4 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924665968234463243" id="message-924665968234463243" title="Message sent: 26-Dec-21 11:12 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924665968028958740/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924665968028958740/card.png" alt="Image attachment" title="Image: card.png (93.44 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">27-Dec-21 12:09 AM</span>
+
+            <div class="chatlog__message " data-message-id="924680392269758465" id="message-924680392269758465" title="Message sent: 27-Dec-21 12:09 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924680392383037480/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924680392383037480/card.png" alt="Image attachment" title="Image: card.png (50.32 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924680536130195477" id="message-924680536130195477" title="Message sent: 27-Dec-21 12:10 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924680536256040970/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924680536256040970/card.png" alt="Image attachment" title="Image: card.png (93.27 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">27-Dec-21 02:46 PM</span>
+
+            <div class="chatlog__message " data-message-id="924901144877215795" id="message-924901144877215795" title="Message sent: 27-Dec-21 02:46 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924901144625573908/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924901144625573908/card.png" alt="Image attachment" title="Image: card.png (40.47 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">27-Dec-21 06:32 PM</span>
+
+            <div class="chatlog__message " data-message-id="924957785026863105" id="message-924957785026863105" title="Message sent: 27-Dec-21 06:32 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924957785316286474/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924957785316286474/card.png" alt="Image attachment" title="Image: card.png (39.99 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+            <div class="chatlog__message " data-message-id="924958579654557718" id="message-924958579654557718" title="Message sent: 27-Dec-21 06:35 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/924958579776172072/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/924958579776172072/card.png" alt="Image attachment" title="Image: card.png (55.35 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">28-Dec-21 10:29 AM</span>
+
+            <div class="chatlog__message " data-message-id="925198831736455200" id="message-925198831736455200" title="Message sent: 28-Dec-21 10:29 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925198831858110464/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925198831858110464/card.png" alt="Image attachment" title="Image: card.png (35.9 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">28-Dec-21 05:31 PM</span>
+
+            <div class="chatlog__message " data-message-id="925304909954449419" id="message-925304909954449419" title="Message sent: 28-Dec-21 05:31 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925304910147379261/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925304910147379261/card.png" alt="Image attachment" title="Image: card.png (69.88 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">28-Dec-21 06:31 PM</span>
+
+            <div class="chatlog__message " data-message-id="925319934408548374" id="message-925319934408548374" title="Message sent: 28-Dec-21 06:31 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925319934656004176/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925319934656004176/card.png" alt="Image attachment" title="Image: card.png (110.33 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">29-Dec-21 01:55 AM</span>
+
+            <div class="chatlog__message " data-message-id="925431766016200815" id="message-925431766016200815" title="Message sent: 29-Dec-21 01:55 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925431766112686110/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925431766112686110/card.png" alt="Image attachment" title="Image: card.png (83.48 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">29-Dec-21 03:00 AM</span>
+
+            <div class="chatlog__message " data-message-id="925448262297731112" id="message-925448262297731112" title="Message sent: 29-Dec-21 03:00 AM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925448262046089357/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925448262046089357/card.png" alt="Image attachment" title="Image: card.png (110.51 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">29-Dec-21 02:11 PM</span>
+
+            <div class="chatlog__message " data-message-id="925617054244012093" id="message-925617054244012093" title="Message sent: 29-Dec-21 02:11 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925617053975597177/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925617053975597177/card.png" alt="Image attachment" title="Image: card.png (143.86 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">29-Dec-21 05:55 PM</span>
+
+            <div class="chatlog__message " data-message-id="925673466227720242" id="message-925673466227720242" title="Message sent: 29-Dec-21 05:55 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925673466047385610/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925673466047385610/card.png" alt="Image attachment" title="Image: card.png (36.18 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+
+<div class="chatlog__message-group">
+
+    <div class="chatlog__author-avatar-container">
+        <img class="chatlog__author-avatar" src="https://cdn.discordapp.com/avatars/159985870458322944/b50adff099924dd5e6b72d13f77eb9d7.png?size=128" alt="Avatar" loading="lazy">
+    </div>
+
+    <div class="chatlog__messages">
+        <span class="chatlog__author-name" title="MEE6#4876" data-user-id="159985870458322944" style="color: rgb(231,76,60)">MEE6</span>
+
+            <span class="chatlog__bot-tag">BOT</span>
+
+        <span class="chatlog__timestamp">29-Dec-21 09:04 PM</span>
+
+            <div class="chatlog__message " data-message-id="925720974110896150" id="message-925720974110896150" title="Message sent: 29-Dec-21 09:04 PM">
+                    <div class="chatlog__content">
+                        <div class="markdown">
+                            <span class="preserve-whitespace">こんにちは！！ようこそ　ゲームルームサーバーへ‼️
+自己紹介チャンネルで自己紹介をして
+認証をもらい説明をよく読んでサーバーに参加しましょう！</span>
+
+                        </div>
+                    </div>
+
+                    <div class="chatlog__attachment " onclick="">
+
+                            <a href="https://cdn.discordapp.com/attachments/922294563845046282/925720974194790440/card.png">
+                                <img class="chatlog__attachment-media" src="https://cdn.discordapp.com/attachments/922294563845046282/925720974194790440/card.png" alt="Image attachment" title="Image: card.png (36.36 KB)" loading="lazy">
+                            </a>
+                    </div>
+
+
+            </div>
+    </div>
+</div>
+
+
+</div>
+
+<div class="postamble">
+    <div class="postamble__entry">Exported 107 message(s)</div>
+</div>
+
+</body>
+
+</html>
